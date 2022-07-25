@@ -2,24 +2,13 @@ import * as msg from '@independentsoft/msg';
 import * as fs from 'fs';
 import axios from 'axios';
 
+// DOCS
+// https://www.skypack.dev/view/@independentsoft/msg
+// https://npm.io/package/@independentsoft/msg
+
 // get html file from URL
 const root = 'http://playground.infomaxim.com/nib/images/'
 const url = 'http://playground.infomaxim.com/nib/email1.html';
-
-const htmlEntities = {
-    nbsp: ' ',
-    cent: '¢',
-    pound: '£',
-    yen: '¥',
-    euro: '€',
-    copy: '©',
-    reg: '®',
-    lt: '<',
-    gt: '>',
-    quot: '"',
-    amp: '&',
-    apos: '\''
-};
 
 const response = await axios.get(url);
 let htmlBody = response.data;
@@ -33,9 +22,10 @@ if (imageUrls) {
 
         const imageSRC = imageUrls[i].replace('"','').replace('"','');
         const imageName = imageSRC.split('/').pop();
-        htmlBody = htmlBody.replace(imageUrls[i], ' src="cid:'+ imageName +'"');
-        
-        // get file name        
+
+        //  insert CID attribute
+
+        htmlBody = htmlBody.replace(imageUrls[i], ' src="cid:img'+ i.toString() +'"');
         
         let suffix = imageName.split('.').pop();
         let filepath = root + imageName;
@@ -53,7 +43,9 @@ if (imageUrls) {
         attachment.fileName = imageName;
         attachment.longFileName = imageName;
         attachment.displayName = imageName;
-        attachment.contentId = imageName;
+
+        //  add contentId
+        attachment.contentId = 'img' + i.toString();
         if(suffix='png'){
             attachment.contentType = 'image/png';
         }
@@ -80,7 +72,7 @@ newMessage.bodyRtf = rtfBody
 newMessage.storeSupportMasks.push(msg.StoreSupportMask.CREATE);
 newMessage.messageFlags.push(msg.MessageFlag.UNSENT);
 
-fs.writeFileSync("C:\\Users\\andy\\AppData\\Roaming\\Microsoft\\Templates\\Baptcare22.oft", newMessage.toBytes());
+fs.writeFileSync("C:\\Users\\andy\\AppData\\Roaming\\Microsoft\\Templates\\ExportedEmail.msg", newMessage.toBytes());
 
-console.log(htmlBodyWithRtf);
+
 
