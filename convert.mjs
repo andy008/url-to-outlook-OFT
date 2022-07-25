@@ -1,9 +1,9 @@
 import * as msg from '@independentsoft/msg';
 import * as fs from 'fs';
-import fetch from 'node-fetch';
+import axios from 'axios';
 
 // get html file from URL
-const root = 'http://playground.infomaxim.com/nib/'
+const root = 'http://playground.infomaxim.com/nib/images/'
 const url = 'http://playground.infomaxim.com/nib/email1.html';
 
 const htmlEntities = {
@@ -21,8 +21,8 @@ const htmlEntities = {
     apos: '\''
 };
 
-const response = await fetch(url);
-let htmlBody = await response.text();
+const response = await axios.get(url);
+let htmlBody = response.data;
 let newMessage = new msg.Message();
 
 // get image URLS from html; save to attachments; add CID attributes
@@ -31,53 +31,56 @@ const imageUrls = htmlBody.match(/src="(.*?)"/g);
 if (imageUrls) {
     for (let i = 0; i < imageUrls.length; i++) {
 
-        const imageSRC = imageUrls[i].replace('"','');
+        const imageSRC = imageUrls[i].replace('"','').replace('"','');
         const imageName = imageSRC.split('/').pop();
-        htmlBody = htmlBody.replace(imageUrls[i], ' cid="'+(i+1)+'"');
+        htmlBody = htmlBody.replace(imageUrls[i], ' src="cid:'+ imageName +'"');
         
         // get file name        
-        console.log('Found image:' + imageName + ' Now:' + imageUrls[i]);
+        
+        let suffix = imageName.split('.').pop();
+        let filepath = root + imageName;
 
-        const imageBuffer = await fetch(root + imageName).then(response => response.arrayBuffer());
-        let attachment = new msg.Attachment(imageBuffer);
+        let buffer  
+        try {
+            console.log('Get image:' + filepath);
+            const arrayBuffer = await axios.get(filepath,  { responseType: 'arraybuffer' })
+            buffer = Buffer.from(arrayBuffer.data,'binary');
+        } catch (error) {
+            console.log('Error:', error);
+        }
+
+        let attachment = new msg.Attachment(buffer);
         attachment.fileName = imageName;
+        attachment.longFileName = imageName;
         attachment.displayName = imageName;
-        attachment.contentId = i+1;
-        attachment.contentLocation = i+1;
-
-        newMessage.attachments.push(attachment);
+        attachment.contentId = imageName;
+        if(suffix='png'){
+            attachment.contentType = 'image/png';
+        }
+        if (suffix='jpg'){
+            attachment.contentType = 'image/jpeg';
+        }
+        if (suffix='gif'){
+            attachment.contentType = 'image/gif';
+        }  
+        newMessage.attachments.push(attachment);        
     }
 }
 
-const htmlBodyWithRtf = "{\\rtf1\\ansi\\ansicpg1252\\fromhtml1 \\htmlrtf0 " + unescapeHTML(htmlBody)  + "}";
+console.log('Attached ' + newMessage.attachments.length + ' images');
+
+const htmlBodyWithRtf = "{\\rtf1\\ansi\\ansicpg1252\\fromhtml1 \\htmlrtf0 " + htmlBody  + "}";
 const rtfBody = new TextEncoder().encode(htmlBodyWithRtf);
 
 newMessage.subject = "NIB Template";
 newMessage.body = "This is an HTML email";
-newMessage.bodyTtmlText = htmlBodyWithRtf
+newMessage.bodyTtmlText = htmlBody
 newMessage.bodyRtf = rtfBody
-newMessage.messageFlags.push(msg.MessageFlag.UNSENT);
+
 newMessage.storeSupportMasks.push(msg.StoreSupportMask.CREATE);
+newMessage.messageFlags.push(msg.MessageFlag.UNSENT);
+
+fs.writeFileSync("C:\\Users\\andy\\AppData\\Roaming\\Microsoft\\Templates\\Baptcare22.oft", newMessage.toBytes());
 
 console.log(htmlBodyWithRtf);
 
-fs.writeFileSync("C:\\Users\\andy\\AppData\\Roaming\\Microsoft\\Templates\\Baptcare5.oft", newMessage.toBytes());
-
-
-function unescapeHTML(str) {
-    return str.replace(/\&([^;]+);/g, function (entity, entityCode) {
-        var match;
-
-        if (entityCode in htmlEntities) {
-            return htmlEntities[entityCode];
-            /*eslint no-cond-assign: 0*/
-        } else if (match = entityCode.match(/^#x([\da-fA-F]+)$/)) {
-            return String.fromCharCode(parseInt(match[1], 16));
-            /*eslint no-cond-assign: 0*/
-        } else if (match = entityCode.match(/^#(\d+)$/)) {
-            return String.fromCharCode(~~match[1]);
-        } else {
-            return entity;
-        }
-    });
-};
