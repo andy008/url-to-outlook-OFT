@@ -1,3 +1,3 @@
-# html-to-oft
+# URL-to-oft
 
-Convert your HTML emails into an editable Microsoft Outlook compatible format.
+Take an HTML email design from a URL and save as an Microsoft Outlook OFT file. 

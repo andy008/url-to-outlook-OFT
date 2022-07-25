@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@independentsoft/msg": "^1.0.2",
+    "node-fetch": "^3.2.9"
+  }
+}
