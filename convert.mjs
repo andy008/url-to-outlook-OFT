@@ -40,8 +40,8 @@ if (imageUrls) {
         }
 
         let attachment = new msg.Attachment(buffer);
-        attachment.fileName = imageName;
-        attachment.longFileName = imageName;
+        attachment.fileName = 'img' + i.toString();
+        attachment.longFileName = 'img' + i.toString();
         attachment.displayName = imageName;
 
         //  add contentId
@@ -55,7 +55,8 @@ if (imageUrls) {
         if (suffix='gif'){
             attachment.contentType = 'image/gif';
         }  
-        newMessage.attachments.push(attachment);        
+        newMessage.attachments.push(attachment);    
+        console.log('Added attachment: ' + attachment.fileName);    
     }
 }
 
