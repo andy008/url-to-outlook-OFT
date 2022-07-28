@@ -7,8 +7,8 @@ import axios from 'axios';
 // https://npm.io/package/@independentsoft/msg
 
 // get html file from URL
-const root = 'http://playground.infomaxim.com/nib/images/'
-const url = 'http://playground.infomaxim.com/nib/email1.html';
+const imagesRoot = 'http://playground.infomaxim.com/nib/images/'
+const url = 'https://playground.infomaxim.com/nib/idx.html';
 
 const response = await axios.get(url);
 let htmlBody = response.data;
@@ -28,7 +28,7 @@ if (imageUrls) {
         htmlBody = htmlBody.replace(imageUrls[i], ' src="cid:img'+ i.toString() +'"');
         
         let suffix = imageName.split('.').pop();
-        let filepath = root + imageName;
+        let filepath = imagesRoot + imageName;
 
         let buffer  
         try {
@@ -72,7 +72,7 @@ newMessage.bodyRtf = rtfBody
 newMessage.storeSupportMasks.push(msg.StoreSupportMask.CREATE);
 newMessage.messageFlags.push(msg.MessageFlag.UNSENT);
 
-fs.writeFileSync("C:\\Users\\andy\\AppData\\Roaming\\Microsoft\\Templates\\ExportedEmail.msg", newMessage.toBytes());
+fs.writeFileSync("C:\\Users\\andy\\Downloads\\ExportedEmail.msg", newMessage.toBytes());
 
 
 
