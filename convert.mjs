@@ -101,11 +101,12 @@ async function merge(campaign){
     }
 
     let logo = '';
-    if(campaign.logo.length==0){logo = 'blank.png'}
+    if(campaign.logo.length==0){campaign.logo = 'blank.png'}
     logo = (imagesRoot + 'logo/' + campaign.logo)
     let joinNow = (campaign.join_url)
 
     htmlBody = htmlBody.replace('[discount]', (campaign.discount * 100).toString());
+
     htmlBody = htmlBody.replace('[join]', joinNow);
     htmlBody = htmlBody.replace('[join]', joinNow);
     htmlBody = htmlBody.replace('[join]', joinNow);
@@ -113,6 +114,7 @@ async function merge(campaign){
     htmlBody = htmlBody.replace('[join]', joinNow);
     htmlBody = htmlBody.replace('[join]', joinNow);
     htmlBody = htmlBody.replace('[join]', joinNow);
+    
     htmlBody = htmlBody.replace('[logo]', logo);
     htmlBody = htmlBody.replace('[hero]', heroImage);
 
